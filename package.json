@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "description": "A web-based prompt management system that stores LLM prompts as markdown files with SQLite indexing",
   "keywords": ["llm", "prompts", "markdown", "ai", "claude", "gpt", "management", "search"],
-  "homepage": "https://github.com/yourusername/promptforge#readme",
+  "homepage": "https://github.com/protocolus/promptforge#readme",
   "bugs": {
-    "url": "https://github.com/yourusername/promptforge/issues"
+    "url": "https://github.com/protocolus/promptforge/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/promptforge.git"
+    "url": "git+https://github.com/protocolus/promptforge.git"
   },
   "license": "ISC",
-  "author": "Your Name <your.email@example.com>",
+  "author": "protocolus@gmail.com",
   "scripts": {
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",

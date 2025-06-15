@@ -16,7 +16,7 @@ A web-based prompt management system that stores LLM prompts as markdown files i
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/promptforge.git
+   git clone https://github.com/protocolus/promptforge.git
    cd promptforge
    ```
 
@@ -100,6 +100,6 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📚 [Documentation](https://github.com/yourusername/promptforge/wiki)
-- 🐛 [Issue Tracker](https://github.com/yourusername/promptforge/issues)
-- 💬 [Discussions](https://github.com/yourusername/promptforge/discussions)
+- 📚 [Documentation](https://github.com/protocolus/promptforge/wiki)
+- 🐛 [Issue Tracker](https://github.com/protocolus/promptforge/issues)
+- 💬 [Discussions](https://github.com/protocolus/promptforge/discussions)
