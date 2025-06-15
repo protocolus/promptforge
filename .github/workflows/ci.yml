@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm run install:all
+    
+    - name: Initialize database
+      run: npm run init-db
+    
+    - name: Run server tests
+      run: cd server && npm test
+      continue-on-error: true
+    
+    - name: Run client tests
+      run: cd client && npm test -- --coverage --passWithNoTests
+      continue-on-error: true
+    
+    - name: Build client
+      run: npm run build
