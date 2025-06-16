@@ -359,7 +359,7 @@ EOF
 # This is the heart of the script - it runs in an infinite loop
 watch_issues() {
     log_message "Starting issue watcher for repository: ${REPO}"
-    log_message "Checking for new issues every 60 seconds..."
+    log_message "Checking for new issues every 20 seconds..."
     log_message "Press Ctrl+C to stop the watcher"
     
     # Infinite loop to continuously monitor for new issues
@@ -398,9 +398,9 @@ watch_issues() {
             log_message "No new issues found"
         fi
         
-        # Wait 60 seconds before checking for new issues again
-        log_message "Waiting 60 seconds before next check..."
-        sleep 60
+        # Wait 20 seconds before checking for new issues again
+        log_message "Waiting 20 seconds before next check..."
+        sleep 20
     done
 }
 
