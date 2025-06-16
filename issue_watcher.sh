@@ -331,6 +331,19 @@ main() {
     # Verify all required tools are installed and configured
     check_dependencies
     
+    # Setup required GitHub labels
+    log_message "Checking and setting up required GitHub labels..."
+    if [ -f "./setup_github_labels.sh" ]; then
+        if ./setup_github_labels.sh "$REPO"; then
+            log_success "GitHub labels are ready"
+        else
+            log_warning "Some labels could not be created, but continuing anyway"
+        fi
+    else
+        log_warning "setup_github_labels.sh not found - skipping label setup"
+        log_warning "Some operations may fail if required labels don't exist"
+    fi
+    
     # Start the continuous monitoring loop
     watch_issues
 }
