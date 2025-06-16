@@ -17,8 +17,22 @@ REPO="protocolus/promptforge"
 # The prompt template that will be sent to Claude Code for issue analysis
 CLAUDE_PROMPT="Please analyze this GitHub issue and perform the following tasks:
 
+## STEP 0: Viability Check
+First, determine if this issue represents a sensible and constructive request:
+- Is the request technically feasible and aligned with the project's goals?
+- Does it represent a legitimate bug, enhancement, or question?
+- Is it spam, nonsensical, harmful, or a bad idea for the project?
+
+If the issue is NOT viable (spam, nonsensical, harmful, or a bad idea):
+- Clearly state: **RECOMMENDATION: CLOSE ISSUE**
+- Explain why this issue should be closed
+- Suggest the 'wontfix' or 'invalid' label as appropriate
+- Be polite but firm in the explanation
+
+If the issue IS viable, continue with the full analysis:
+
 ## STEP 1: Issue Classification
-First, classify this issue into one of these categories:
+Classify this issue into one of these categories:
 - bug: Software defect or error that needs fixing
 - enhancement: New feature or improvement request
 - question: Question or help request
@@ -31,6 +45,7 @@ Based on your classification, suggest appropriate GitHub labels that should be a
 - Priority level (high, medium, low)
 - Complexity (easy, moderate, complex)
 - Component affected (frontend, backend, database, etc.)
+- Special labels (wontfix, invalid) if the issue should be closed
 
 ## STEP 3: Detailed Analysis
 Provide:
@@ -207,6 +222,79 @@ EOF
     rm -f "$temp_comment"
 }
 
+# Function to check if Claude recommends closing the issue and close it if needed
+check_and_close_if_needed() {
+    local issue_number=$1
+    local analysis_file=$2
+    
+    log_message "Checking if issue #${issue_number} should be closed based on analysis..."
+    
+    # Check if the analysis contains the close recommendation
+    if grep -q "RECOMMENDATION: CLOSE ISSUE" "$analysis_file"; then
+        log_warning "Claude recommends closing issue #${issue_number} as not viable"
+        
+        # Extract the reason for closing (look for explanation after the recommendation)
+        local close_reason=""
+        local found_recommendation=false
+        
+        while IFS= read -r line; do
+            if [[ "$line" =~ "RECOMMENDATION: CLOSE ISSUE" ]]; then
+                found_recommendation=true
+                continue
+            fi
+            
+            # If we found the recommendation, capture the next few lines as the reason
+            if [[ "$found_recommendation" == true ]] && [[ -n "$line" ]]; then
+                close_reason="${close_reason}${line}\n"
+                # Stop after getting a reasonable explanation (usually 2-3 lines)
+                if [[ $(echo -e "$close_reason" | wc -l) -ge 3 ]]; then
+                    break
+                fi
+            fi
+        done < "$analysis_file"
+        
+        # Close the issue with a polite message
+        local close_message=$(mktemp)
+        cat > "$close_message" << EOF
+## Issue Closed by Automated Analysis
+
+This issue has been automatically closed based on the analysis above.
+
+**Reason**: The automated analysis determined that this issue is not viable for implementation.
+
+If you believe this was closed in error, please feel free to:
+1. Provide additional context or clarification
+2. Explain why this would benefit the project
+3. Request that a maintainer review the decision
+
+Thank you for your interest in PromptForge!
+
+---
+*This action was performed automatically by the PromptForge issue analyzer.*
+EOF
+        
+        # Post the closing comment
+        if gh issue comment "$issue_number" --repo "$REPO" --body-file "$close_message" 2>/dev/null; then
+            log_success "Posted closing explanation on issue #${issue_number}"
+        else
+            log_error "Failed to post closing comment on issue #${issue_number}"
+        fi
+        
+        # Close the issue
+        if gh issue close "$issue_number" --repo "$REPO" --reason "not planned" 2>/dev/null; then
+            log_success "Closed issue #${issue_number} as not viable"
+        else
+            log_error "Failed to close issue #${issue_number}"
+            log_error "May need additional permissions to close issues"
+        fi
+        
+        # Clean up
+        rm -f "$close_message"
+    else
+        log_message "Issue #${issue_number} is viable - keeping it open"
+    fi
+}
+
 # Function to process a single GitHub issue
 # This handles the complete workflow for analyzing one issue
 process_issue() {
@@ -254,6 +342,9 @@ EOF
         
         # Post the analysis as a comment on the GitHub issue
         post_analysis_comment "$issue_number" "issues/issue_${issue_number}_analysis.md"
+        
+        # Check if Claude recommends closing the issue
+        check_and_close_if_needed "$issue_number" "issues/issue_${issue_number}_analysis.md"
         
     else
         log_error "Failed to analyze issue #${issue_number}"
@@ -373,9 +464,11 @@ How it works:
    - Downloads the full issue content
    - Creates a detailed analysis prompt
    - Runs claude -p (Claude in headless mode) to analyze the issue
+   - Performs viability check (spam, nonsensical, harmful requests)
    - Saves analysis to issues/issue_[number]_analysis.md
    - Automatically applies suggested GitHub labels
    - Posts analysis as a comment on the GitHub issue
+   - Closes issue automatically if deemed not viable
    - Marks issue with "clide-analyzed" label to prevent re-processing
 
 Output files:
