@@ -4,3 +4,47 @@
 2025-06-17T04:10:12: Database initialized
 2025-06-17T04:10:12: Watching for prompt file changes...
 2025-06-17T04:10:12: PromptForge server running on port 3001
+2025-06-17T04:22:27: File added: /home/clide/promptforge/prompts/coding/implement-feature.md
+2025-06-17T04:22:27: Indexed: coding/implement-feature.md
+2025-06-17T04:22:33: File added: /home/clide/promptforge/prompts/coding/code-review.md
+2025-06-17T04:22:33: Indexed: coding/code-review.md
+2025-06-17T04:22:44: File added: /home/clide/promptforge/prompts/coding/api-development.md
+2025-06-17T04:22:44: File changed: /home/clide/promptforge/prompts/coding/api-development.md
+2025-06-17T04:22:44: Indexed: coding/api-development.md
+2025-06-17T04:23:00: File added: /home/clide/promptforge/prompts/debugging/bug-analysis.md
+2025-06-17T04:23:00: Indexed: debugging/bug-analysis.md
+2025-06-17T04:23:10: File added: /home/clide/promptforge/prompts/debugging/performance-issues.md
+2025-06-17T04:23:10: Indexed: debugging/performance-issues.md
+2025-06-17T04:23:22: File added: /home/clide/promptforge/prompts/debugging/error-investigation.md
+2025-06-17T04:23:22: Indexed: debugging/error-investigation.md
+2025-06-17T04:23:39: File added: /home/clide/promptforge/prompts/refactoring/code-cleanup.md
+2025-06-17T04:23:39: Indexed: refactoring/code-cleanup.md
+2025-06-17T04:23:49: File added: /home/clide/promptforge/prompts/refactoring/legacy-modernization.md
+2025-06-17T04:23:49: Indexed: refactoring/legacy-modernization.md
+2025-06-17T04:24:07: File added: /home/clide/promptforge/prompts/documentation/api-documentation.md
+2025-06-17T04:24:07: Indexed: documentation/api-documentation.md
+2025-06-17T04:24:17: File added: /home/clide/promptforge/prompts/documentation/code-comments.md
+2025-06-17T04:24:17: File changed: /home/clide/promptforge/prompts/documentation/code-comments.md
+2025-06-17T04:24:17: Indexed: documentation/code-comments.md
+2025-06-17T04:24:34: File added: /home/clide/promptforge/prompts/testing/unit-tests.md
+2025-06-17T04:24:34: Indexed: testing/unit-tests.md
+2025-06-17T04:24:47: File added: /home/clide/promptforge/prompts/testing/integration-tests.md
+2025-06-17T04:24:47: Indexed: testing/integration-tests.md
+2025-06-17T04:25:06: File added: /home/clide/promptforge/prompts/optimization/performance-optimization.md
+2025-06-17T04:25:06: Indexed: optimization/performance-optimization.md
+2025-06-17T04:25:18: File added: /home/clide/promptforge/prompts/optimization/database-optimization.md
+2025-06-17T04:25:18: Indexed: optimization/database-optimization.md
+2025-06-17T04:25:38: File added: /home/clide/promptforge/prompts/architecture/system-design.md
+2025-06-17T04:25:38: Indexed: architecture/system-design.md
+2025-06-17T04:25:52: File added: /home/clide/promptforge/prompts/architecture/microservices.md
+2025-06-17T04:25:52: Indexed: architecture/microservices.md
+2025-06-17T04:26:12: File added: /home/clide/promptforge/prompts/coding/security-review.md
+2025-06-17T04:26:12: Indexed: coding/security-review.md
+2025-06-17T04:26:24: File added: /home/clide/promptforge/prompts/debugging/git-workflow.md
+2025-06-17T04:26:24: Indexed: debugging/git-workflow.md
+2025-06-17T04:26:36: File added: /home/clide/promptforge/prompts/architecture/ci-cd-pipeline.md
+2025-06-17T04:26:36: Indexed: architecture/ci-cd-pipeline.md
+2025-06-17T04:41:02: Database initialized
+2025-06-17T04:41:02: Watching for prompt file changes...
+2025-06-17T04:41:02: PromptForge server running on port 3001
+2025-06-17T04:41:02: Environment: production

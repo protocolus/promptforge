@@ -32,6 +32,33 @@ body {
   font-size: 0.875rem;
 }
 
+.app-nav {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.nav-button {
+  padding: 8px 16px;
+  border: 1px solid #30363d;
+  background: #21262d;
+  color: #c9d1d9;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: #30363d;
+}
+
+.nav-button.active {
+  background: #238636;
+  color: white;
+  border-color: #238636;
+}
+
 .app-content {
   flex: 1;
   display: flex;
@@ -327,4 +354,11 @@ body {
 
 .empty-state p {
   color: #8b949e;
+}
+
+/* Demo Content */
+.demo-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #0d1117;
 }

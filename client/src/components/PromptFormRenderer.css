@@ -1,0 +1,140 @@
+.prompt-form-renderer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e1e5e9);
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-section-header {
+  color: var(--text-primary, #2c3e50);
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 24px 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-color, #e1e5e9);
+}
+
+.form-section-header:first-child {
+  margin-top: 0;
+}
+
+.form-checkbox-item {
+  margin: 8px 0;
+}
+
+.form-checkbox-item label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.form-checkbox-item input[type="checkbox"] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color, #007bff);
+  cursor: pointer;
+}
+
+.checkbox-label {
+  color: var(--text-primary, #333);
+  user-select: none;
+}
+
+.form-textarea-item {
+  margin: 12px 0;
+}
+
+.form-textarea-item textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary, #333);
+  background-color: var(--bg-primary, #fff);
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.form-textarea-item textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.form-textarea-item textarea::placeholder {
+  color: var(--text-muted, #6c757d);
+  font-style: italic;
+}
+
+.form-text-content {
+  color: var(--text-secondary, #6c757d);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .prompt-form-renderer {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-muted: #888;
+    --border-color: #444;
+    --primary-color: #4dabf7;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .prompt-form-renderer {
+    padding: 16px;
+    margin: 0 16px;
+  }
+  
+  .form-section-header {
+    font-size: 1.1em;
+  }
+  
+  .form-textarea-item textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Accessibility improvements */
+.form-checkbox-item input[type="checkbox"]:focus {
+  outline: 2px solid var(--primary-color, #007bff);
+  outline-offset: 2px;
+}
+
+.form-checkbox-item label:hover .checkbox-label {
+  color: var(--primary-color, #007bff);
+}
+
+/* Animation for smooth interactions */
+.form-checkbox-item,
+.form-textarea-item {
+  transition: transform 0.1s ease;
+}
+
+.form-checkbox-item:hover,
+.form-textarea-item:hover {
+  transform: translateY(-1px);
+}

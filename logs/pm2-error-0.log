@@ -1,0 +1,4 @@
+2025-06-17T04:22:44: Error indexing /home/clide/promptforge/prompts/coding/api-development.md: [Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: prompts.file_path] {
+  errno: 19,
+  code: 'SQLITE_CONSTRAINT'
+}
