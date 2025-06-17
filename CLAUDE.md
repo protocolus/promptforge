@@ -28,13 +28,26 @@ PromptForge is a fully implemented web-based prompt management system that store
 ## Development Commands
 
 ```bash
+# Initial Setup
 npm run install:all    # Install all dependencies
 npm run init-db       # Initialize SQLite database
-npm run dev          # Start both server and client
+
+# Development
+npm run dev          # Start both server and client concurrently
 npm run dev:server   # Start only server (port 3001)
 npm run dev:client   # Start only client (port 3000)
-npm run build        # Build for production
+
+# Production
+npm run build        # Build client for production
 npm start            # Start production server
+
+# Code Quality
+npm run lint         # Run ESLint on server and client code
+npm test             # Run tests in both server and client
+
+# Git Hooks
+# Pre-commit hook automatically runs ESLint on staged files
+# See docs/husky-setup.md for detailed configuration
 ```
 
 ## Project Structure
@@ -80,3 +93,10 @@ promptforge/
 - **Git integration**: Only markdown files are tracked, database is ignored
 - **Dark theme**: GitHub-inspired dark theme for the UI
 - **Monaco editor**: Professional code editor with markdown highlighting
+- **Code Quality**: ESLint with pre-commit hooks for consistent code standards
+- **Comprehensive Prompts**: 19+ professional Claude Code prompts across 7 categories
+
+## Documentation
+
+- `docs/husky-setup.md` - Complete guide for Husky and ESLint configuration
+- See `/prompts` directory for example Claude Code prompts organized by category
