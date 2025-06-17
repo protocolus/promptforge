@@ -8,7 +8,7 @@ const PROMPTS_DIR = path.join(__dirname, '../../prompts');
 
 export function watchPromptFiles() {
   const watcher = chokidar.watch(PROMPTS_DIR, {
-    ignored: /(^|[\/\\])\../, // ignore dotfiles
+    ignored: /(^|[/\\])\../, // ignore dotfiles
     persistent: true,
     ignoreInitial: true
   });

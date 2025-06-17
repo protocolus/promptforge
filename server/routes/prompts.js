@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { query, run } from '../db/database.js';
+import { query } from '../db/database.js';
 import { writePromptFile, deletePromptFile } from '../services/fileService.js';
 import { indexPromptFile } from '../services/indexService.js';
 
@@ -60,7 +60,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Prompt not found' });
     }
     res.json(prompt[0]);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch prompt' });
   }
 });
@@ -164,7 +164,7 @@ router.get('/meta/categories', async (req, res) => {
       'SELECT DISTINCT category, COUNT(*) as count FROM prompts GROUP BY category'
     );
     res.json(categories);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch categories' });
   }
 });
