@@ -26,4 +26,5 @@ app.use('/api/sync', syncRoutes);
 
 app.listen(PORT, () => {
   console.log(`PromptForge server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
