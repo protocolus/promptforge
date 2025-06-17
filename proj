@@ -1,0 +1,272 @@
+#!/bin/bash
+
+# Configuration
+PROJECTS_DIR="$HOME"  # Change this if your projects are elsewhere
+
+# Command to run in each project
+# Since clide is an alias for 'claude --dangerously-skip-permissions'
+PROJECT_COMMAND="claude --dangerously-skip-permissions"
+
+# Alternatively, to force alias expansion (keep commented unless needed):
+# PROJECT_COMMAND="shopt -s expand_aliases; source ~/.bashrc; clide"
+
+# Colors for better UI
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Script name for help text
+SCRIPT_NAME=$(basename "$0")
+
+# Function to show help
+show_help() {
+    echo -e "${GREEN}=== Project Screen Launcher ===${NC}"
+    echo ""
+    echo "USAGE:"
+    echo "  $SCRIPT_NAME                  # Interactive mode"
+    echo "  $SCRIPT_NAME <project-name>   # Direct mode - open/create specific project"
+    echo "  $SCRIPT_NAME --help           # Show this help"
+    echo ""
+    echo "DESCRIPTION:"
+    echo "  Manages screen sessions for different projects. Each project gets its own"
+    echo "  named screen session running clide in the project directory."
+    echo ""
+    echo "INTERACTIVE MODE:"
+    echo "  - Shows numbered list of existing projects"
+    echo "  - Enter number to select existing project"
+    echo "  - Enter name to create new project"
+    echo "  - Enter 'h' for help"
+    echo "  - Enter 'q' to quit"
+    echo ""
+    echo "DIRECT MODE:"
+    echo "  $SCRIPT_NAME myproject"
+    echo "  - Opens existing project 'myproject' or creates it if it doesn't exist"
+    echo "  - Automatically attaches to the screen session"
+    echo ""
+    echo "EXAMPLES:"
+    echo "  $SCRIPT_NAME                  # Start interactive selector"
+    echo "  $SCRIPT_NAME promptforge      # Open/create promptforge project"
+    echo "  $SCRIPT_NAME new-webapp       # Create and open new-webapp project"
+    echo ""
+    echo "SCREEN COMMANDS:"
+    echo "  Ctrl+A, D     # Detach from screen session"
+    echo "  screen -ls    # List all screen sessions"
+    echo "  screen -r promptforge  # Resume specific session"
+    echo ""
+    echo "CONFIGURATION:"
+    echo "  Projects directory: $PROJECTS_DIR"
+    echo "  Command to run: $PROJECT_COMMAND"
+    echo ""
+}
+
+# Parse command line arguments
+if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+    show_help
+    exit 0
+fi
+
+# Function to list existing projects (directories)
+list_projects() {
+    echo -e "${BLUE}Existing projects:${NC}"
+    echo "-------------------"
+    
+    # Find directories in home, excluding hidden ones
+    find "$PROJECTS_DIR" -maxdepth 1 -type d ! -path "$PROJECTS_DIR" ! -name ".*" -printf "%f\n" | sort | nl -w2 -s'. '
+    
+    echo ""
+}
+
+# Function to check if screen session already exists
+screen_exists() {
+    screen -ls | grep -q "$1"
+}
+
+# Function to start screen with clide
+start_project_screen() {
+    local project_name="$1"
+    local project_path="$2"
+    local auto_attach="${3:-false}"  # Default to false if not provided
+    local screen_name="${project_name}"  # Use project name directly
+    
+    # Check if screen session already exists
+    if screen_exists "$screen_name"; then
+        echo -e "${YELLOW}Screen session '$screen_name' already exists!${NC}"
+        
+        # In auto mode, just resume
+        if [ "$auto_attach" == "true" ]; then
+            echo -e "${GREEN}Resuming existing session...${NC}"
+            screen -r "$screen_name"
+            return
+        fi
+        
+        echo -n "Do you want to (r)esume, (k)ill and restart, or (c)ancel? [r/k/c]: "
+        read -r action
+        
+        case $action in
+            r|R)
+                echo -e "${GREEN}Resuming session...${NC}"
+                screen -r "$screen_name"
+                return
+                ;;
+            k|K)
+                echo -e "${YELLOW}Killing existing session...${NC}"
+                screen -S "$screen_name" -X quit
+                sleep 1
+                ;;
+            *)
+                echo "Cancelled."
+                return
+                ;;
+        esac
+    fi
+    
+    # Start new screen session
+    echo -e "${GREEN}Starting screen session '$screen_name' for $project_name...${NC}"
+    echo -e "${BLUE}Working directory: $project_path${NC}"
+    
+    # Create a wrapper script to ensure proper environment setup
+    local wrapper_script="/tmp/screen_wrapper_$"
+    cat > "$wrapper_script" << 'EOF'
+#!/bin/bash
+# Source all shell initialization files
+[ -f ~/.bashrc ] && source ~/.bashrc
+[ -f ~/.bash_profile ] && source ~/.bash_profile
+[ -f ~/.profile ] && source ~/.profile
+[ -f ~/.bash_aliases ] && source ~/.bash_aliases
+
+# Change to project directory
+cd "$1"
+pwd
+
+# Try to run clide, fall back to showing error with debug info
+if command -v clide &> /dev/null; then
+    clide
+else
+    echo "Error: 'clide' command not found"
+    echo "Current PATH: $PATH"
+    echo "Checking for clide alias:"
+    alias clide 2>/dev/null || echo "No alias found for 'clide'"
+    echo ""
+    echo "Available aliases:"
+    alias
+    echo ""
+    echo "Press Enter to continue with bash shell..."
+    read
+fi
+
+# Keep the shell open
+exec bash
+EOF
+    chmod +x "$wrapper_script"
+    
+    # Start screen with the wrapper script
+    screen -S "$screen_name" -dm bash -c "$wrapper_script '$project_path'"
+    
+    # Clean up wrapper script after a delay
+    (sleep 2 && rm -f "$wrapper_script") &
+    
+    # Give it a moment to start
+    sleep 1
+    
+    # In auto mode, attach immediately
+    if [ "$auto_attach" == "true" ]; then
+        screen -r "$screen_name"
+    else
+        # Ask if user wants to attach immediately
+        echo -n "Attach to session now? [y/N]: "
+        read -r attach
+        if [[ $attach =~ ^[Yy]$ ]]; then
+            screen -r "$screen_name"
+        else
+            echo -e "${GREEN}Session started in background. Resume with: screen -r $screen_name${NC}"
+        fi
+    fi
+}
+
+# Function to handle project selection/creation
+handle_project() {
+    local project_name="$1"
+    local auto_attach="$2"  # true for direct mode, false for interactive
+    
+    local project_path="$PROJECTS_DIR/$project_name"
+    
+    # Check if it's a new project
+    if [ ! -d "$project_path" ]; then
+        echo -e "${GREEN}Creating new project: $project_name${NC}"
+        mkdir -p "$project_path"
+        
+        # In direct mode, skip git prompt
+        if [ "$auto_attach" != "true" ]; then
+            echo -n "Initialize git repository? [y/N]: "
+            read -r init_git
+            if [[ $init_git =~ ^[Yy]$ ]]; then
+                cd "$project_path" && git init
+                echo -e "${GREEN}Git repository initialized${NC}"
+            fi
+        fi
+    fi
+    
+    # Start the screen session
+    start_project_screen "$project_name" "$project_path" "$auto_attach"
+}
+
+# Main script starts here
+
+# Direct mode - if project name provided as argument
+if [ -n "$1" ]; then
+    project_name="$1"
+    echo -e "${GREEN}Direct mode: Opening project '$project_name'${NC}"
+    handle_project "$project_name" "true"
+    exit 0
+fi
+
+# Interactive mode
+clear
+echo -e "${GREEN}=== Project Screen Launcher ===${NC}\n"
+
+# List existing projects
+list_projects
+
+# Get user choice
+echo -e "${YELLOW}Options:${NC}"
+echo "  - Enter a number to select an existing project"
+echo "  - Enter a name to create a new project"
+echo "  - Enter 'h' for help"
+echo "  - Enter 'q' to quit"
+echo ""
+echo -n "Your choice: "
+read -r choice
+
+# Handle quit
+if [[ "$choice" == "q" ]]; then
+    echo "Goodbye!"
+    exit 0
+fi
+
+# Handle help
+if [[ "$choice" == "h" ]]; then
+    clear
+    show_help
+    echo ""
+    echo -n "Press Enter to continue..."
+    read -r
+    exec "$0"  # Restart the script
+fi
+
+# Check if choice is a number (selecting existing project)
+if [[ "$choice" =~ ^[0-9]+$ ]]; then
+    # Get the nth directory
+    project_name=$(find "$PROJECTS_DIR" -maxdepth 1 -type d ! -path "$PROJECTS_DIR" ! -name ".*" -printf "%f\n" | sort | sed -n "${choice}p")
+    
+    if [ -z "$project_name" ]; then
+        echo -e "${RED}Invalid selection!${NC}"
+        exit 1
+    fi
+    
+    handle_project "$project_name" "false"
+else
+    # Create new project
+    handle_project "$choice" "false"
+fi 

@@ -2,7 +2,16 @@
   "name": "promptforge",
   "version": "1.0.0",
   "description": "A web-based prompt management system that stores LLM prompts as markdown files with SQLite indexing",
-  "keywords": ["llm", "prompts", "markdown", "ai", "claude", "gpt", "management", "search"],
+  "keywords": [
+    "llm",
+    "prompts",
+    "markdown",
+    "ai",
+    "claude",
+    "gpt",
+    "management",
+    "search"
+  ],
   "homepage": "https://github.com/protocolus/promptforge#readme",
   "bugs": {
     "url": "https://github.com/protocolus/promptforge/issues"
@@ -22,7 +31,8 @@
     "start": "cd server && npm start",
     "init-db": "cd server && npm run init-db",
     "test": "cd server && npm test && cd ../client && npm test",
-    "lint": "cd server && npm run lint && cd ../client && npm run lint"
+    "lint": "cd server && npm run lint && cd ../client && npm run lint",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
