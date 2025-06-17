@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Form Renderer Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .input-section, .output-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .prompt-text {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            resize: vertical;
+        }
+        
+        .form-output {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 300px;
+        }
+        
+        .form-section-header {
+            color: #2c3e50;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+        
+        .form-checkbox-item {
+            margin: 8px 0;
+        }
+        
+        .form-checkbox-item label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .form-textarea-item {
+            margin: 12px 0;
+        }
+        
+        .form-textarea-item textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .export-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .data-output {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prompt Form Renderer - Live Demo</h1>
+    <p>Edit the prompt text on the left to see the interactive form rendered on the right.</p>
+    
+    <div class="container">
+        <div class="input-section">
+            <h3>Prompt Text (Markdown-like Syntax)</h3>
+            <textarea id="promptText" class="prompt-text" placeholder="Enter your prompt text here...">**Project Requirements:**
+- [ ] High availability (99.9%+ uptime)
+- [x] Horizontal scalability
+- [ ] Security and compliance
+- [ ] Real-time capabilities
+
+**Feature Description:**
+[Describe what the feature should do]
+
+**Acceptance Criteria:**
+[List the requirements the feature must meet]
+
+**Technical Constraints:**
+[Any limitations or requirements to consider]</textarea>
+        </div>
+        
+        <div class="output-section">
+            <h3>Rendered Interactive Form</h3>
+            <div id="formOutput" class="form-output"></div>
+            <button class="export-button" onclick="exportFormData()">Export Form Data as JSON</button>
+            <div id="dataOutput" class="data-output"></div>
+        </div>
+    </div>
+
+    <script>
+        let formData = {
+            checkboxes: {},
+            textareas: {}
+        };
+
+        function parsePrompt(text) {
+            const lines = text.split('\n');
+            const elements = [];
+            let currentSection = null;
+
+            lines.forEach((line, index) => {
+                const trimmedLine = line.trim();
+                
+                // Parse section headers (bold text)
+                const headerMatch = trimmedLine.match(/^\*\*(.*?)\*\*:?$/);
+                if (headerMatch) {
+                    currentSection = headerMatch[1];
+                    elements.push({
+                        type: 'header',
+                        content: currentSection,
+                        id: `header_${index}`
+                    });
+                    return;
+                }
+
+                // Parse checkboxes
+                const checkboxMatch = trimmedLine.match(/^-\s*\[([ x])\]\s*(.+)$/);
+                if (checkboxMatch) {
+                    const isChecked = checkboxMatch[1] === 'x';
+                    const label = checkboxMatch[2];
+                    const id = `checkbox_${currentSection || 'default'}_${index}`;
+                    
+                    elements.push({
+                        type: 'checkbox',
+                        id,
+                        label,
+                        checked: isChecked,
+                        section: currentSection
+                    });
+                    return;
+                }
+
+                // Parse textarea placeholders
+                const textareaMatch = trimmedLine.match(/^\[(.+?)\]$/);
+                if (textareaMatch) {
+                    const placeholder = textareaMatch[1];
+                    const id = `textarea_${currentSection || 'default'}_${index}`;
+                    
+                    elements.push({
+                        type: 'textarea',
+                        id,
+                        placeholder,
+                        section: currentSection
+                    });
+                    return;
+                }
+
+                // Regular text content
+                if (trimmedLine && !trimmedLine.startsWith('#')) {
+                    elements.push({
+                        type: 'text',
+                        content: trimmedLine,
+                        id: `text_${index}`
+                    });
+                }
+            });
+
+            return elements;
+        }
+
+        function renderForm(text) {
+            const elements = parsePrompt(text);
+            const formOutput = document.getElementById('formOutput');
+            
+            // Reset form data for new elements
+            formData = { checkboxes: {}, textareas: {} };
+            
+            formOutput.innerHTML = '';
+
+            elements.forEach(element => {
+                const div = document.createElement('div');
+                
+                switch (element.type) {
+                    case 'header':
+                        div.innerHTML = `<h3 class="form-section-header">${element.content}</h3>`;
+                        break;
+                        
+                    case 'checkbox':
+                        formData.checkboxes[element.id] = element.checked;
+                        div.className = 'form-checkbox-item';
+                        div.innerHTML = `
+                            <label>
+                                <input type="checkbox" ${element.checked ? 'checked' : ''} 
+                                       onchange="updateCheckbox('${element.id}', this.checked)">
+                                <span>${element.label}</span>
+                            </label>
+                        `;
+                        break;
+                        
+                    case 'textarea':
+                        formData.textareas[element.id] = '';
+                        div.className = 'form-textarea-item';
+                        div.innerHTML = `
+                            <textarea placeholder="${element.placeholder}" 
+                                     oninput="updateTextarea('${element.id}', this.value)"></textarea>
+                        `;
+                        break;
+                        
+                    case 'text':
+                        div.innerHTML = `<p style="color: #6c757d; font-size: 14px; margin: 8px 0;">${element.content}</p>`;
+                        break;
+                }
+                
+                formOutput.appendChild(div);
+            });
+            
+            updateDataOutput();
+        }
+
+        function updateCheckbox(id, checked) {
+            formData.checkboxes[id] = checked;
+            updateDataOutput();
+        }
+
+        function updateTextarea(id, value) {
+            formData.textareas[id] = value;
+            updateDataOutput();
+        }
+
+        function updateDataOutput() {
+            const dataOutput = document.getElementById('dataOutput');
+            dataOutput.textContent = JSON.stringify(formData, null, 2);
+        }
+
+        function exportFormData() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                data: formData
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                type: 'application/json'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `prompt-form-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        document.getElementById('promptText').addEventListener('input', function() {
+            renderForm(this.value);
+        });
+
+        // Render initial form
+        renderForm(document.getElementById('promptText').value);
+    </script>
+</body>
+</html>
