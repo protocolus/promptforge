@@ -1,0 +1,46 @@
+[
+  {
+    "id": "github-webhook",
+    "execute-command": "/home/clide/promptforge/webhook-config/handle-github-event.sh",
+    "command-working-directory": "/home/clide/promptforge",
+    "pass-arguments-to-command": [
+      {
+        "source": "payload",
+        "name": "repository.full_name"
+      },
+      {
+        "source": "header",
+        "name": "X-GitHub-Event"
+      },
+      {
+        "source": "payload",
+        "name": "action"
+      },
+      {
+        "source": "entire-payload"
+      }
+    ],
+    "pass-environment-to-command": [
+      {
+        "source": "payload",
+        "name": "repository.full_name",
+        "envname": "GITHUB_REPO"
+      },
+      {
+        "source": "header",
+        "name": "X-GitHub-Event",
+        "envname": "GITHUB_EVENT_TYPE"
+      }
+    ],
+    "trigger-rule": {
+      "match": {
+        "type": "payload-hmac-sha256",
+        "secret": "909c0f8dc15d8deadfa4972c34856d997f33dc1d672bb71b48023a185e6b6a6a",
+        "parameter": {
+          "source": "header",
+          "name": "X-Hub-Signature-256"
+        }
+      }
+    }
+  }
+]

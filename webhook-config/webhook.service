@@ -1,0 +1,23 @@
+[Unit]
+Description=GitHub Webhook Service for PromptForge
+After=network.target
+
+[Service]
+Type=simple
+User=clide
+WorkingDirectory=/home/clide/promptforge
+ExecStart=/usr/bin/webhook -hooks /home/clide/promptforge/webhook-config/hooks.json -port 9000 -verbose
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/clide/promptforge/webhook-config/logs/webhook-service.log
+StandardError=append:/home/clide/promptforge/webhook-config/logs/webhook-service.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/clide/promptforge/webhook-config/logs
+
+[Install]
+WantedBy=multi-user.target

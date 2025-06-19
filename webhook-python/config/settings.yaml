@@ -1,0 +1,64 @@
+# GitHub Webhook Handler Configuration
+
+server:
+  host: "0.0.0.0"
+  port: 9000
+  webhook_path: "/github-webhook"
+
+github:
+  token: "${GITHUB_TOKEN}"
+  webhook_secret: "${GITHUB_WEBHOOK_SECRET}"
+  
+claude:
+  api_key: "${ANTHROPIC_API_KEY}"
+  model: "claude-3-sonnet-20240229"
+  max_tokens: 4000
+
+repositories:
+  - name: "protocolus/promptforge"
+    events:
+      - "issues"
+      - "pull_request"
+      - "pull_request_review"
+      - "workflow_run"
+    settings:
+      auto_close_invalid: true
+      post_analysis_comments: true
+      apply_labels: true
+
+prompts:
+  base_dir: "./prompts"
+  templates:
+    issues:
+      opened: "issues/new_issue.md"
+      edited: "issues/issue_updated.md"
+    pull_request:
+      opened: "pull_requests/new_pr.md"
+      synchronize: "pull_requests/pr_updated.md"
+    pull_request_review:
+      submitted: "reviews/review_submitted.md"
+    pull_request_review_requested:
+      default: "reviews/pr_review_requested.md"
+    workflow_run:
+      completed: "workflows/workflow_failed.md"
+
+outputs:
+  base_dir: "./outputs"
+  directories:
+    issues: "issues"
+    pull_requests: "pull_requests"
+    reviews: "reviews"
+    workflows: "workflows"
+
+logging:
+  level: "INFO"
+  format: "json"
+  file: "./logs/webhook.log"
+  max_size_mb: 10
+  backup_count: 5
+
+features:
+  async_processing: true
+  rate_limiting: true
+  signature_validation: true
+  payload_logging: false
