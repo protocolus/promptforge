@@ -20,9 +20,18 @@ await initDatabase();
 // Start file watcher
 watchPromptFiles();
 
-// Routes
+// API Routes
 app.use('/api/prompts', promptRoutes);
 app.use('/api/sync', syncRoutes);
+
+// Serve static files from React build
+const clientBuildPath = path.join(__dirname, '..', 'client', 'build');
+app.use(express.static(clientBuildPath));
+
+// Catch all handler - send React app for any route not handled by API
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`PromptForge server running on port ${PORT}`);

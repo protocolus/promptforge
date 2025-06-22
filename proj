@@ -31,7 +31,7 @@ show_help() {
     echo ""
     echo "DESCRIPTION:"
     echo "  Manages screen sessions for different projects. Each project gets its own"
-    echo "  named screen session running clide in the project directory."
+    echo "  named screen session running the configured command in the project directory."
     echo ""
     echo "INTERACTIVE MODE:"
     echo "  - Shows numbered list of existing projects"
@@ -83,7 +83,7 @@ screen_exists() {
     screen -ls | grep -q "$1"
 }
 
-# Function to start screen with clide
+# Function to start screen with configured command
 start_project_screen() {
     local project_name="$1"
     local project_path="$2"
@@ -126,46 +126,8 @@ start_project_screen() {
     echo -e "${GREEN}Starting screen session '$screen_name' for $project_name...${NC}"
     echo -e "${BLUE}Working directory: $project_path${NC}"
     
-    # Create a wrapper script to ensure proper environment setup
-    local wrapper_script="/tmp/screen_wrapper_$"
-    cat > "$wrapper_script" << 'EOF'
-#!/bin/bash
-# Source all shell initialization files
-[ -f ~/.bashrc ] && source ~/.bashrc
-[ -f ~/.bash_profile ] && source ~/.bash_profile
-[ -f ~/.profile ] && source ~/.profile
-[ -f ~/.bash_aliases ] && source ~/.bash_aliases
-
-# Change to project directory
-cd "$1"
-pwd
-
-# Try to run clide, fall back to showing error with debug info
-if command -v clide &> /dev/null; then
-    clide
-else
-    echo "Error: 'clide' command not found"
-    echo "Current PATH: $PATH"
-    echo "Checking for clide alias:"
-    alias clide 2>/dev/null || echo "No alias found for 'clide'"
-    echo ""
-    echo "Available aliases:"
-    alias
-    echo ""
-    echo "Press Enter to continue with bash shell..."
-    read
-fi
-
-# Keep the shell open
-exec bash
-EOF
-    chmod +x "$wrapper_script"
-    
-    # Start screen with the wrapper script
-    screen -S "$screen_name" -dm bash -c "$wrapper_script '$project_path'"
-    
-    # Clean up wrapper script after a delay
-    (sleep 2 && rm -f "$wrapper_script") &
+    # Start screen directly with the configured command
+    screen -S "$screen_name" -dm bash -c "cd '$project_path' && $PROJECT_COMMAND"
     
     # Give it a moment to start
     sleep 1
